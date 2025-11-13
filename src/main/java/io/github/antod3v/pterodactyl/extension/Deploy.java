@@ -109,18 +109,21 @@ public class Deploy {
     }
 
     /**
-     * Retrieves the name of the plugin from the plugin.yml file.
+     * Retrieves the name of the plugin from the plugin.yml or paper-plugin.yml file.
      *
      * @return the name of the plugin
-     * @throws IllegalStateException if the plugin.yml file is not found or does not have a name field
+     * @throws IllegalStateException if the plugin.yml or paper-plugin.yml file is not found or does not have a name field
      */
     @SneakyThrows
     public String getPluginName() {
 
         File pluginYml = new File(project.getProjectDir(), "src/main/resources/plugin.yml");
+        if (!pluginYml.exists()) {
+            pluginYml = new File(project.getProjectDir(), "src/main/resources/paper-plugin.yml");
+        }
 
         if (!pluginYml.exists()) {
-            throw new IllegalStateException("plugin.yml not found ("+pluginYml.getAbsolutePath()+").");
+            throw new IllegalStateException("plugin.yml or paper-plugin.yml not found ("+pluginYml.getAbsolutePath()+").");
         }
 
         String content = new String(Files.readAllBytes(pluginYml.toPath()));
@@ -128,7 +131,7 @@ public class Deploy {
         Matcher matcher = Pattern.compile("name: (.+)").matcher(content);
 
         if (!matcher.find()) {
-            throw new IllegalStateException("plugin.yml doesn't have name field");
+            throw new IllegalStateException(pluginYml.getName()+" doesn't have name field");
         }
 
         return matcher.group(1);
